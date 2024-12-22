@@ -10,34 +10,32 @@ const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d
 const SignPage = () => {
   const {register, handleSubmit, reset, formState:{errors}} = useForm();
   const navigate  = useNavigate();
-  const [error,setError] = useState<any>();
+  const [error,setError] = useState<any>(null);
 
   async function onSubmit(data:any){
  console.log(data);
+
 
   const response =  await fetch('api/v1/signup',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify(data)
   });
-// getting the data from the backend 
-  const a = await response.json();
-  setError(a.error);
-
-  if(response.ok){
-    toast.success("User is created successfully");
-    reset();
-    navigate('/login');
-  }else{
-   toast.error("User is not created sucessfully")
-  }
-
-  
  
+if(!response.ok){
+  const errorData = await response.json();
+  setError(errorData.error);
+  toast.error("Failed to create user");
+ 
+}else{
+  toast.success("User is created successfully");
+  setError(null);
+  reset();
+  navigate('/login');
+}
 
-  }
 
-
+ }
 
   return (
     <div className="font-[sans-serif] bg-slate-600 md:h-screen">
@@ -112,6 +110,7 @@ const SignPage = () => {
                   required:true ,
                   minLength:5 ,
                   pattern:passwordPattern
+
                 })}  
                 className="w-full bg-transparent text-sm text-white border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none" placeholder="Enter password" />
               <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-2 cursor-pointer" viewBox="0 0 128 128">
