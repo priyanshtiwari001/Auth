@@ -16,7 +16,7 @@ const SignPage = () => {
  console.log(data);
 
 
-  const response =  await fetch('api/v1/signup',{
+  const response =  await fetch('api/v1/user/signup',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify(data)
@@ -24,6 +24,7 @@ const SignPage = () => {
  
 if(!response.ok){
   const errorData = await response.json();
+  console.log(errorData);
   setError(errorData.error);
   toast.error("Failed to create user");
  
@@ -109,7 +110,7 @@ if(!response.ok){
                 {
                   required:true ,
                   minLength:5 ,
-                  pattern:passwordPattern
+                
 
                 })}  
                 className="w-full bg-transparent text-sm text-white border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none" placeholder="Enter password" />
@@ -130,7 +131,7 @@ if(!response.ok){
               Register
             </button>
           
-            <p className="text-sm text-white mt-8">Already have an account? <Link to="/" className="text-yellow-400 font-semibold hover:underline ml-1">Login here</Link></p>
+            <p className="text-sm text-white mt-8">Already have an account? <Link to="/login" className="text-yellow-400 font-semibold hover:underline ml-1">Login here</Link></p>
           </div>
         </form>
       </div>

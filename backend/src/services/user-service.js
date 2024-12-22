@@ -2,7 +2,7 @@ const AppErrors = require('../utils/error/app-errors');
 const UserRepository = require('../repository/user-repository');
 const { default: mongoose } = require('mongoose');
 const { StatusCodes } = require('http-status-codes');
-
+const {Auth}= require('../utils/common')
 const userRepo = new UserRepository();
 
 async function createUser(data){
@@ -38,12 +38,27 @@ async function createUser(data){
 }
 
 
-async function getUser(data){
+async function signIn(data){
     try {
-        const user = await userRepo.get(data);
-    return user;
+        const user = await userRepo.getUserByEmail(data.email);
+        if(!user){
+            throw new AppErrors("user is not found for given email", StatusCodes.BAD_REQUEST)
+        }
+        
+        const userPassword = data.password;
+        const encryptPassword = user.password;
+        const isPasswordMatch = Auth.checkPassword(userPassword,encryptPassword);
+       
+        if(!isPasswordMatch){
+            throw new AppErrors("Password is mismatched", StatusCodes.BAD_REQUEST);
+        }
+
+        const jwtToken = Auth.createToken({id:user.id,}, 'priyanshu2002', {expiresIn:'1h'});
+
+        return jwtToken;
     } catch (error) {
         console.log(error);
+        throw error;
         
     }
 }
@@ -53,5 +68,6 @@ async function getUser(data){
 
 module.exports={
     createUser,
-    getUser
+    signIn
+   
 }

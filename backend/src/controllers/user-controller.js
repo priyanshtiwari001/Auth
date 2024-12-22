@@ -19,17 +19,16 @@ async function signUp(req,res){
     }
 }
 
-async function getUser(req,res){
+async function signin(req,res){
     try {
-        const response = await UserService.getUser(req.params.id);
+        const response = await UserService.signIn({
+            email:req.body.email,
+            password:req.body.password
+        });
         SuccessResponse.data = response;
         return res.status(StatusCodes.OK).json(SuccessResponse); 
     } catch (error) {
-        if(error.errors._message == 'User validation failed'){
-            ErrorResponse.error=error.errors._message;
-            console.log("Value is miss mismatched. Please check again!!");
-            return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
-        }
+       ErrorResponse.error=error;
        
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
     }
@@ -40,5 +39,5 @@ async function getUser(req,res){
 
 module.exports={
     signUp,
-    getUser
+    signin
 }
