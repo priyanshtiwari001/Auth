@@ -3,7 +3,7 @@ import {Link} from 'react-router'
 
 const LoginPage = () => {
   return (
-    <div className="font-[sans-serif] bg-white md:h-screen">
+    <div className="font-[sans-serif] bg-slate-600 md:h-screen">
     <div className="grid md:grid-cols-2 items-center gap-8 h-full">
 
       <div className="flex items-center md:p-8 p-6 bg-[#0C172C] h-full lg:w-full lg:ml-auto">

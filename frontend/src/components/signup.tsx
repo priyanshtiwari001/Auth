@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router';
-import {useForm} from 'react-hook-form'
-import {toast} from 'sonner'
+import { Link, useNavigate } from 'react-router';
+import {useForm, useFormState} from 'react-hook-form'
+import {toast} from 'sonner';
+
+const usernamePattern = /^[a-zA-Z0-9._]+$/;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 const SignPage = () => {
-  const {register, handleSubmit} = useForm();
+  const {register, handleSubmit, reset, formState:{errors}} = useForm();
+  const navigate  = useNavigate();
+  const [error,setError] = useState<any>();
 
   async function onSubmit(data:any){
  console.log(data);
@@ -13,26 +20,30 @@ const SignPage = () => {
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify(data)
   });
-  const dataResponse = await response.json();
-console.log(dataResponse);
+// getting the data from the backend 
+  const a = await response.json();
+  setError(a.error);
 
   if(response.ok){
     toast.success("User is created successfully");
+    reset();
+    navigate('/login');
   }else{
    toast.error("User is not created sucessfully")
   }
 
-
+  
+ 
 
   }
 
 
 
   return (
-    <div className="font-[sans-serif] bg-white md:h-screen">
+    <div className="font-[sans-serif] bg-slate-600 md:h-screen">
     <div className="grid md:grid-cols-2 items-center gap-8 h-full">
-      <div className="max-md:order-1 p-4">
-        <img src="/sign-up-user.svg" className="lg:max-w-[85%] w-full h-full object-contain block mx-auto" alt="login-image" />
+      <div className="max-md:order-1 p-4  ">
+        <img src="/sign-up-user.svg" className="lg:max-w-[85%]  w-full h-full object-contain block mx-auto" alt="login-image" />
       </div>
 
       <div className="flex items-center md:p-8 p-6 bg-[#0C172C] h-full lg:w-11/12 lg:ml-auto">
@@ -42,19 +53,38 @@ console.log(dataResponse);
           </div>
 
           <div>
-            <label className="text-white text-xs block mb-2">Full Name</label>
+            <label className="text-white text-xs block mb-2">Username</label>
             <div className="relative flex items-center">
-              <input type="text" {...register("username")} className="w-full bg-transparent text-sm text-white border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none" placeholder="Enter name" />
+              <input type="text" 
+              {...register("username", {
+                required:true, 
+                minLength:4,
+                 maxLength:20, 
+                 pattern: usernamePattern,
+                 })} 
+              className="w-full bg-transparent text-sm text-white border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none" placeholder="Enter name" />
               <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-2" viewBox="0 0 24 24">
                 <circle cx="10" cy="7" r="6" data-original="#000000"></circle>
                 <path d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z" data-original="#000000"></path>
               </svg>
             </div>
+            
+            {errors?.username?.type === "required" && <p className='text-[#bf1650] text-[0.83em] mt-2 font-mono  -tracking-widest'> ⚠ This field is required</p>}
+
+            {errors?.username?.type == "minLength"  && <p className='text-[#bf1650] text-[0.83em] mt-2 font-mono  -tracking-widest'> ⚠ Username must be at least 4 characters</p>}
+
+            {errors?.username?.type == "pattern"  && <p className='text-[#bf1650] text-[0.83em] mt-2 font-mono  -tracking-widest'> ⚠ Username can only contain letters, numbers, dots, and underscores</p>}
+            
           </div>
           <div className="mt-8">
             <label className="text-white text-xs block mb-2">Email</label>
             <div className="relative flex items-center">
-              <input  type="text" {...register("email")} className="w-full bg-transparent text-sm text-white border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none" placeholder="Enter email" />
+              <input  type="text" {
+                ...register("email",
+                {required:true, 
+                  pattern:emailPattern
+                 })} 
+                 className="w-full bg-transparent text-sm text-white border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none" placeholder="Enter email" />
               <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-2" viewBox="0 0 682.667 682.667">
                 <defs>
                   <clipPath id="a" clipPathUnits="userSpaceOnUse">
@@ -67,15 +97,32 @@ console.log(dataResponse);
                 </g>
               </svg>
             </div>
+            {errors?.email?.type === "required" && <p className='text-[#bf1650] text-[0.83em] mt-2 font-mono  -tracking-widest'> ⚠ This field is required</p>}
+
+            {errors?.email?.type === "pattern" && <p className='text-[#bf1650] text-[0.83em] mt-2 font-mono  -tracking-widest'> ⚠ Invalid email format</p>}
+            
+            {error?.statusCode === 409 && <p className='text-[#bf1650] text-[0.83em] mt-2 font-mono  -tracking-widest'> ⚠ {error?.explanation}</p>}
           </div>
           <div className="mt-8">
             <label className="text-white text-xs block mb-2">Password</label>
             <div className="relative flex items-center">
-              <input  type="password" {...register("password")}  className="w-full bg-transparent text-sm text-white border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none" placeholder="Enter password" />
+              <input  type="password" {
+                ...register("password",
+                {
+                  required:true ,
+                  minLength:5 ,
+                  pattern:passwordPattern
+                })}  
+                className="w-full bg-transparent text-sm text-white border-b border-gray-300 focus:border-yellow-400 px-2 py-3 outline-none" placeholder="Enter password" />
               <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-2 cursor-pointer" viewBox="0 0 128 128">
                 <path d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z" data-original="#000000"></path>
               </svg>
             </div>
+            {errors?.password?.type === "required" && <p className='text-[#bf1650] text-[0.83em] mt-2 font-mono  -tracking-widest'> ⚠ This field is required</p>}
+            
+            {errors?.password?.type == "minLength"  && <p className='text-[#bf1650] text-[0.83em] mt-2 font-mono  -tracking-widest'> ⚠ password must be at least 5 characters</p>}
+
+            {errors?.password?.type === "pattern" && <p className='text-[#bf1650] text-[0.83em]  mt-2 font-mono  -tracking-widest'> ⚠ Password must include uppercase, lowercase, number, and special character</p>}
           </div>
 
         

@@ -28,7 +28,7 @@ async function createUser(data){
 
        // Duplicate Value
        if(error.name == 'MongoServerError' && error.errorResponse.code == 11000){ 
-       throw new AppErrors('Duplicate key found. Please enter unique value', StatusCodes.BAD_REQUEST);
+       throw new AppErrors('Duplicate email found. Please enter unique email', StatusCodes.CONFLICT);
        }
       
        

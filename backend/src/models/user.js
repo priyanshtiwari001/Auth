@@ -10,9 +10,9 @@ const userSchema = new Schema({
         trim:true,
         validate:{
             validator: function (v){
-                return /^\S+\w{8,32}\S{1,}/.test(v);
+                return /^[a-zA-Z0-9._]+$/.test(v);
             },
-        message: 'username must not include  special character and space or tab'
+        message: 'Username can only contain letters, numbers, dots, and underscores'
 
         }
     },
