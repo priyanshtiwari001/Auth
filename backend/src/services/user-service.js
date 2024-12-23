@@ -44,7 +44,6 @@ async function createUser(data){
 async function signIn(data){
     try {
         const user = await userRepo.getUserByEmail(data.email);
-        console.log(user);
         if(!user){
             throw new AppErrors("user is not found for given email", StatusCodes.BAD_REQUEST)
         }
@@ -54,7 +53,7 @@ async function signIn(data){
         const isPasswordMatch = Auth.checkPassword(userPassword,encryptPassword);
        
         if(!isPasswordMatch){
-            throw new AppErrors("Password is mismatched", StatusCodes.BAD_REQUEST);
+            throw new AppErrors("Password is mismatched or incorrect!", StatusCodes.BAD_REQUEST);
         }
 
         const jwtToken = Auth.createToken({id:user.id}, ServerConfig.SECRET_KEY, {expiresIn:ServerConfig.EXPIRE_IN});
@@ -72,7 +71,7 @@ async function isAuthenicated(token){
        if(!token){
         throw new AppErrors('JWT token is missing', StatusCodes.BAD_REQUEST);
        }
-       const response = Auth.verifyToken(token,ServerConfig.SECRETKEY);
+       const response = Auth.verifyToken(token,ServerConfig.SECRET_KEY);
      
        const user = await userRepo.get(response.id.id);
        if(!user){
